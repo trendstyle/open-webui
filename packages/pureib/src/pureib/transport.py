@@ -263,6 +263,8 @@ class IBTransport(asyncio.Transport):
                     break
                 ev = CmEvent(*raw)
                 if ev.kind == DISCONNECTED or ev.kind == DEVICE_REMOVAL:
+                    # The peer disconnected first: never issue a second rdma_disconnect.
+                    self._disconnecting = True
                     self._on_cq()
                     self._finish(OSError('device removed') if ev.kind == DEVICE_REMOVAL else None)
                     return
