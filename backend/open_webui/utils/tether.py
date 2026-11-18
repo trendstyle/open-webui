@@ -868,7 +868,19 @@ class RelayClient:
             raise interrupted from error
 
 
+def _ib_client_session(**kwargs):
+    # ib://[gid]:port terminals are reached over native InfiniBand (pureib), not IPoIB or TCP.
+    try:
+        from pureib.http_client import IBConnector
+    except ImportError as exc:
+        raise RuntimeError('ib:// terminal connections need the pureib package installed') from exc
+    kwargs.setdefault('connector', IBConnector())
+    return aiohttp.ClientSession(**kwargs)
+
+
 def get_terminal_client(url, user_id=None, service='open_terminal', **kwargs):
     if str(url).startswith('tether://'):
         return RelayClient(user_id, service=service, timeout=kwargs.get('timeout'))
+    if str(url).startswith('ib://'):
+        return _ib_client_session(**kwargs)
     return aiohttp.ClientSession(**kwargs)
