@@ -49,3 +49,5 @@ cd packages/pureib
 python setup.py build_ext --inplace   # needs libibverbs and librdmacm headers
 PYTHONPATH=src pytest
 ```
+
+The protocol and HTTP tests need only this package. The tests in `tests/integration` also import the Open WebUI backend from `backend/` in this repository and the open-terminal package, and skip when open-terminal is not installed. They run the real Open Terminal app behind pureib on the in-process fabric and call it through Open WebUI's terminal client. The `--ib` CLI test skips until the open-terminal option is merged.
